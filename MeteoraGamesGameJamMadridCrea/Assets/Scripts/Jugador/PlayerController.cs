@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,9 +21,28 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        currentLives = maxLives;
+
+        // CARGAR VIDAS GUARDADAS CON SEGURIDAD EXTRA
+        currentLives = PlayerPrefs.GetInt("PlayerLives", maxLives);
+
+        // FORZAR que nunca tenga más de maxLives ni menos de 1
+        if (currentLives > maxLives)
+        {
+            currentLives = maxLives;
+            PlayerPrefs.SetInt("PlayerLives", currentLives);
+            PlayerPrefs.Save();
+        }
+        else if (currentLives < 1)
+        {
+            currentLives = maxLives;
+            PlayerPrefs.SetInt("PlayerLives", currentLives);
+            PlayerPrefs.Save();
+        }
+
+        Debug.Log("Vidas al iniciar nivel: " + currentLives);
     }
 
+    // El resto del script se mantiene igual...
     void Update()
     {
         if (!isInvincible)
@@ -81,6 +101,15 @@ public class PlayerController : MonoBehaviour
     {
         currentLives--;
 
+        // GUARDAR LAS VIDAS ACTUALES
+        PlayerPrefs.SetInt("PlayerLives", currentLives);
+        PlayerPrefs.Save();
+
+        Debug.Log("Vidas después de daño: " + currentLives);
+
+        // GUARDAR PROGRESO ANTES DE REINICIAR
+        SaveProgressBeforeRestart();
+
         if (currentLives <= 0)
         {
             GameOver();
@@ -88,6 +117,15 @@ public class PlayerController : MonoBehaviour
         else
         {
             StartCoroutine(InvincibilityFrames());
+        }
+    }
+
+    void SaveProgressBeforeRestart()
+    {
+        LevelProgressTracker progressTracker = FindObjectOfType<LevelProgressTracker>();
+        if (progressTracker != null)
+        {
+            progressTracker.SaveCurrentProgress();
         }
     }
 
@@ -118,7 +156,19 @@ public class PlayerController : MonoBehaviour
 
     void GameOver()
     {
-        Debug.Log("Game Over!");
-        RestartLevel();
+        Debug.Log("Game Over! Reiniciando vidas...");
+
+        // Guardar progreso final
+        SaveProgressBeforeRestart();
+
+        ResetLives();
+        SceneManager.LoadScene("LevelSelection");
+    }
+
+    public void ResetLives()
+    {
+        PlayerPrefs.SetInt("PlayerLives", maxLives);
+        PlayerPrefs.Save();
+        currentLives = maxLives;
     }
 }
