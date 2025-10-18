@@ -14,10 +14,10 @@ public class LevelSelectionManager : MonoBehaviour
     [Header("Progreso Visual")]
     public Slider progressBar;
     public TextMeshProUGUI progressText;
-    public Image[] coins;
 
     [Header("Configuración de Niveles")]
     public string[] levelNames = { "Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4" };
+    public string[] sceneNames = { "Nivel1", "Nivel2", "Nivel3", "Nivel4" };
 
     private int currentLevelIndex = 0;
 
@@ -32,7 +32,6 @@ public class LevelSelectionManager : MonoBehaviour
 
     void PreviousLevel()
     {
-        // IZQUIERDA = nivel anterior (número más bajo)
         if (currentLevelIndex > 0)
         {
             currentLevelIndex--;
@@ -42,7 +41,6 @@ public class LevelSelectionManager : MonoBehaviour
 
     void NextLevel()
     {
-        // DERECHA = nivel siguiente (número más alto)  
         if (currentLevelIndex < levelNames.Length - 1)
         {
             currentLevelIndex++;
@@ -65,21 +63,9 @@ public class LevelSelectionManager : MonoBehaviour
             progressText.text = Mathf.RoundToInt(progress * 100) + "%";
         }
 
-        // FLECHAS: Izquierda desactivada en nivel 1, Derecha desactivada en nivel 4
+        // Actualizar estado de las flechas
         leftArrow.interactable = (currentLevelIndex > 0);
         rightArrow.interactable = (currentLevelIndex < levelNames.Length - 1);
-
-        // Actualizar monedas
-        UpdateCoinsDisplay();
-    }
-
-    void UpdateCoinsDisplay()
-    {
-        for (int i = 0; i < coins.Length; i++)
-        {
-            int coinCollected = PlayerPrefs.GetInt("Level_" + currentLevelIndex + "_Coin_" + i, 0);
-            coins[i].color = (coinCollected == 1) ? Color.yellow : Color.gray;
-        }
     }
 
     float GetLevelProgress(int levelIndex)
@@ -90,6 +76,16 @@ public class LevelSelectionManager : MonoBehaviour
     public void PlayCurrentLevel()
     {
         PlayerPrefs.SetInt("SelectedLevel", currentLevelIndex);
-        SceneManager.LoadScene("GameScene");
+
+        // Cargar la escena específica del nivel seleccionado
+        if (currentLevelIndex >= 0 && currentLevelIndex < sceneNames.Length)
+        {
+            SceneManager.LoadScene(sceneNames[currentLevelIndex]);
+        }
+        else
+        {
+            Debug.LogError("Índice de nivel fuera de rango: " + currentLevelIndex);
+            SceneManager.LoadScene("GameScene");
+        }
     }
 }
