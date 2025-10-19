@@ -10,29 +10,31 @@ public class LevelProgressTracker : MonoBehaviour
     public Transform player;
 
     private float maxProgress = 0f;
+    private int currentLevelIndex = 0;
 
     void Start()
     {
-        // CARGAR EL PROGRESO MÁXIMO PREVIO en lugar de resetear a 0
+        // Obtener el índice del nivel actual
+        currentLevelIndex = PlayerPrefs.GetInt("SelectedLevel", 0);
+
+        // CARGAR EL PROGRESO MÁXIMO PREVIO DE ESTE NIVEL
         LoadPreviousMaxProgress();
 
-        Debug.Log($"Nivel iniciado. Progreso máximo anterior: {maxProgress * 100}%");
+        Debug.Log($"Nivel {currentLevelIndex} iniciado. Progreso máximo anterior: {maxProgress * 100}%");
     }
 
     void LoadPreviousMaxProgress()
     {
-        int levelIndex = PlayerPrefs.GetInt("SelectedLevel", 0);
-
         if (GameManager.instance != null)
         {
-            maxProgress = GameManager.instance.LoadLevelProgress(levelIndex);
+            maxProgress = GameManager.instance.LoadLevelProgress(currentLevelIndex);
         }
         else
         {
-            maxProgress = PlayerPrefs.GetFloat("LastProgress_Level_" + levelIndex, 0f);
+            maxProgress = PlayerPrefs.GetFloat("LastProgress_Level_" + currentLevelIndex, 0f);
         }
 
-        Debug.Log($"Progreso cargado: {maxProgress * 100}%");
+        Debug.Log($"Progreso cargado para nivel {currentLevelIndex}: {maxProgress * 100}%");
     }
 
     void Update()
@@ -43,7 +45,7 @@ public class LevelProgressTracker : MonoBehaviour
 
         if (currentProgress > maxProgress)
         {
-            Debug.Log($"¡Nuevo récord! {currentProgress * 100}% (anterior: {maxProgress * 100}%)");
+            Debug.Log($"¡Nuevo récord en nivel {currentLevelIndex}! {currentProgress * 100}% (anterior: {maxProgress * 100}%)");
             maxProgress = currentProgress;
         }
     }
@@ -59,16 +61,15 @@ public class LevelProgressTracker : MonoBehaviour
     {
         if (GameManager.instance != null)
         {
-            GameManager.instance.SaveLevelProgress(maxProgress);
+            GameManager.instance.SaveLevelProgress(currentLevelIndex, maxProgress);
         }
         else
         {
-            int levelIndex = PlayerPrefs.GetInt("SelectedLevel", 0);
-            PlayerPrefs.SetFloat("LastProgress_Level_" + levelIndex, maxProgress);
+            PlayerPrefs.SetFloat("LastProgress_Level_" + currentLevelIndex, maxProgress);
             PlayerPrefs.Save();
         }
 
-        Debug.Log($"Progreso guardado definitivo: {maxProgress * 100}%");
+        Debug.Log($"Progreso guardado para nivel {currentLevelIndex}: {maxProgress * 100}%");
     }
 
     public float GetCurrentProgress()

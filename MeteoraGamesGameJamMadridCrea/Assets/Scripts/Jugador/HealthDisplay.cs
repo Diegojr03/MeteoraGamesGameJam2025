@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthDisplay : MonoBehaviour
@@ -20,14 +20,14 @@ public class HealthDisplay : MonoBehaviour
 
     System.Collections.IEnumerator FindPlayerCoroutine()
     {
-        // Esperar un frame para asegurar que PlayerController está listo
+        // Esperar un frame para asegurar que PlayerController estï¿½ listo
         yield return null;
 
         playerController = FindObjectOfType<PlayerController>();
 
         if (playerController == null)
         {
-            Debug.LogError("No se encontró PlayerController en la escena");
+            Debug.LogError("No se encontrï¿½ PlayerController en la escena");
         }
         else
         {

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,11 +12,13 @@ public class PlayerController : MonoBehaviour
     public int maxLives = 3;
     public int currentLives;
 
+
     private Rigidbody2D rb;
     private bool isGrounded;
     private bool canDoubleJump;
     private bool isInvincible = false;
     private SpriteRenderer spriteRenderer;
+    public GameObject panelMuerte;
 
     void Start()
     {
@@ -97,7 +100,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void TakeDamage()
+    public void TakeDamage()
     {
         currentLives--;
 
@@ -136,7 +139,7 @@ public class PlayerController : MonoBehaviour
         float timer = 0f;
         float blinkInterval = 0.1f;
 
-        while (timer < 2f)
+        while (timer < 1f)
         {
             spriteRenderer.enabled = !spriteRenderer.enabled;
             yield return new WaitForSeconds(blinkInterval);
@@ -162,7 +165,7 @@ public class PlayerController : MonoBehaviour
         SaveProgressBeforeRestart();
 
         ResetLives();
-        SceneManager.LoadScene("LevelSelection");
+        panelMuerte.SetActive(true);
     }
 
     public void ResetLives()

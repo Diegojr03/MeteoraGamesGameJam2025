@@ -1,10 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PauseMenuManager : MonoBehaviour
 {
+    
     public GameObject pauseMenu;
     private bool isPaused = false;
+
+    
 
     void Update()
     {
@@ -50,6 +54,12 @@ public class PauseMenuManager : MonoBehaviour
         ResetLives();
         Time.timeScale = 1f; // Asegurar que el tiempo se reanude
         SceneManager.LoadScene("MenuInicial");
+    }
+
+    public void RestartLevel()
+    {
+        ResetLives();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     void ResetLives()

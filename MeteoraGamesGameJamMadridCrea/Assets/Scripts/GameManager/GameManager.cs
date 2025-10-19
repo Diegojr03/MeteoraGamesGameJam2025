@@ -21,11 +21,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SaveLevelProgress(float progress)
+    public void SaveLevelProgress(int levelIndex, float progress)
     {
-        currentLevelProgress = Mathf.Clamp01(progress);
-        PlayerPrefs.SetFloat("LastProgress_Level_" + currentLevelIndex, currentLevelProgress);
+        progress = Mathf.Clamp01(progress);
+        PlayerPrefs.SetFloat("LastProgress_Level_" + levelIndex, progress);
         PlayerPrefs.Save();
+
+        Debug.Log($"Progreso guardado - Nivel {levelIndex}: {progress * 100}%");
     }
 
     public float LoadLevelProgress(int levelIndex)
