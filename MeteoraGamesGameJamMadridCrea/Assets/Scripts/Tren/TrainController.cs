@@ -13,13 +13,29 @@ public class TrainController : MonoBehaviour
     public ParticleSystem smokePrefab;
     public Vector2[] smokePoints; // Puntos locales desde donde emitir humo
 
-    private float nextSmokeTime = 0f;
-    public float smokeInterval = 1f; // cada cuánto generar humo
+    private ParticleSystem[] activeSmokeSystems; // Sistemas de humo activos
+
+    private void Start()
+    {
+        // Crear sistemas de humo como hijos del tren
+        if (smokePrefab != null && smokePoints.Length > 0)
+        {
+            activeSmokeSystems = new ParticleSystem[smokePoints.Length];
+
+            for (int i = 0; i < smokePoints.Length; i++)
+            {
+                Vector3 worldPoint = transform.TransformPoint(smokePoints[i]);
+                ParticleSystem newSmoke = Instantiate(smokePrefab, worldPoint, Quaternion.identity, transform);
+                newSmoke.transform.localPosition = smokePoints[i]; // Posición local
+                activeSmokeSystems[i] = newSmoke;
+                newSmoke.Play();
+            }
+        }
+    }
 
     private void Update()
     {
         MoveTrain();
-        EmitSmoke();
     }
 
     void MoveTrain()
@@ -40,25 +56,38 @@ public class TrainController : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.x *= -1;
         transform.localScale = scale;
+
+        // Ajustar los sistemas de humo para que mantengan la dirección correcta
+        if (activeSmokeSystems != null)
+        {
+            foreach (ParticleSystem smoke in activeSmokeSystems)
+            {
+                if (smoke != null)
+                {
+                    // Mantener la escala X positiva para que el humo siempre emita hacia arriba
+                    Vector3 smokeScale = smoke.transform.localScale;
+                    smokeScale.x = Mathf.Abs(smokeScale.x); // Siempre positivo
+                    smoke.transform.localScale = smokeScale;
+
+                    // Opcional: Ajustar la rotación si es necesario
+                    // smoke.transform.rotation = Quaternion.identity;
+                }
+            }
+        }
     }
 
-    void EmitSmoke()
+    // Opcional: Detener humo cuando el tren se destruya
+    private void OnDestroy()
     {
-        if (smokePrefab == null || smokePoints.Length == 0) return;
-
-        if (Time.time >= nextSmokeTime)
+        if (activeSmokeSystems != null)
         {
-            foreach (Vector2 point in smokePoints)
+            foreach (ParticleSystem smoke in activeSmokeSystems)
             {
-                Vector3 worldPoint = transform.TransformPoint(point);
-                ParticleSystem newSmoke = Instantiate(smokePrefab, worldPoint, Quaternion.identity);
-                newSmoke.Play();
-
-                // Hacemos que se destruyan tras un tiempo para limpiar memoria
-                Destroy(newSmoke.gameObject, newSmoke.main.startLifetime.constantMax + 2f);
+                if (smoke != null)
+                {
+                    smoke.Stop();
+                }
             }
-
-            nextSmokeTime = Time.time + smokeInterval;
         }
     }
 
